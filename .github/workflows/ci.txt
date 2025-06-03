@@ -126,3 +126,34 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+  
+  docker-build:
+    needs: [build-frontend, install-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Optional: Docker Hub login (replace with your secrets if pushing)
+      #- name: Log in to Docker Hub
+      #  uses: docker/login-action@v2
+      #  with:
+      #    username: ${{ secrets.DOCKER_USERNAME }}
+      #    password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build backend Docker image with BuildKit
+        run: |
+          DOCKER_BUILDKIT=1 docker build -t my-backend:latest -f backend/Dockerfile backend/
+
+      - name: Build frontend Docker image with BuildKit
+        run: |
+          DOCKER_BUILDKIT=1 docker build -t my-frontend:latest -f frontend/Dockerfile frontend/
+
+      # Optional: Push images to Docker Hub
+      #- name: Push backend image
+      #  run: docker push my-backend:latest
+
+      #- name: Push frontend image
+      #  run: docker push my-frontend:latest
